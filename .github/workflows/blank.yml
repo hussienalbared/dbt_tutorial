@@ -1,0 +1,12 @@
+name: dbt CI
+on: [push]
+jobs:
+  dbt_run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install dbt
+        run: pip install dbt-core dbt-bigquery
+      - name: Run dbt
+        run: dbt run
