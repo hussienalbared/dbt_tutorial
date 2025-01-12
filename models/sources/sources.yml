@@ -1,0 +1,7 @@
+version: 2
+sources:
+  - name: sales
+    tables:
+      - name: users
+      - name: transactions
+      - name: user_sessions      
