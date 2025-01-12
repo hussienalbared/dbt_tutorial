@@ -1,12 +1,50 @@
 name: dbt CI
-on: [push]
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
   dbt_run:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Install dbt
-        run: pip install dbt-core dbt-bigquery
-      - name: Run dbt
-        run: dbt run
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dbt
+      run: pip install dbt-core dbt-snowflake
+
+    - name: Create dbt profiles directory
+      run: mkdir -p ~/.dbt
+
+    - name: Write profiles.yml
+      run: |
+        cat > ~/.dbt/profiles.yml <<EOL
+        my_project:
+          target: dev
+          outputs:
+            dev:
+              type: snowflake
+              account: ${{ secrets.DBT_ACCOUNT }}
+              user: ${{ secrets.DBT_USER }}
+              password: ${{ secrets.DBT_PASSWORD }}
+              role: ${{ secrets.DBT_ROLE }}
+              database: ${{ secrets.DBT_DATABASE }}
+              warehouse: ${{ secrets.DBT_WAREHOUSE }}
+              schema: ${{ secrets.DBT_SCHEMA }}
+              threads: 4
+        EOL
+
+    - name: Run dbt debug
+      run: dbt debug
+
+    - name: Run dbt models
+      run: dbt run
